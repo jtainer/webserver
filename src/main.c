@@ -5,7 +5,7 @@
 #include <signal.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
-#include "hash_table.h"
+#include "endpoints.h"
 
 #define PORT 8080
 #define BACKLOG 10
@@ -75,16 +75,7 @@ int main() {
 	signal(SIGINT, sigint_handler);
 
 	// Create endpoint resolution table
-	const unsigned int table_size = 32;
-	Table endpoints = CreateTable(table_size);
-	InsertTableEntry(&endpoints, "/", "assets/text/home.html");
-	InsertTableEntry(&endpoints, "/path/a", "assets/text/a.html");
-	InsertTableEntry(&endpoints, "/path/b", "assets/text/b.html");
-	InsertTableEntry(&endpoints, "/path/c", "assets/text/c.html");
-	InsertTableEntry(&endpoints, "/image", "assets/images/home.png");
-	InsertTableEntry(&endpoints, "/image/a", "assets/images/a.png");
-	InsertTableEntry(&endpoints, "/image/b", "assets/images/b.png");
-	InsertTableEntry(&endpoints, "/image/c", "assets/images/c.png");
+	Table endpoints = LoadEndpoints();
 
 	// Create the server socket
 	// Setting SOCK_NONBLOCK means we can poll accept() instead of blocking on it
@@ -164,7 +155,7 @@ int main() {
 		}
 */
 
-		const char* filepath = GetTableValue(&endpoints, token[1]);
+		const char* filepath = ResolveEndpoint(&endpoints, token[1]);
 		if (filepath) {
 			const char* ext = get_file_ext(filepath);
 			if (!strcmp(ext, "html"))
@@ -179,7 +170,7 @@ int main() {
 	// Close the server socket
 	close(server_socket);
 
-	DestroyTable(&endpoints);
+	UnloadEndpoints(&endpoints);
 
 	return 0;
 }
