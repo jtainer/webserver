@@ -11,9 +11,11 @@
 #define BACKLOG 10
 #define BUFFER_SIZE 4096
 
-static int should_exit = 0;
-void sigint_handler(int arg) {
-	should_exit = 1;
+static volatile int should_exit = 0;
+void signal_handler(int signum) {
+	if (signum == SIGINT || signum == SIGTERM) {
+		should_exit = 1;
+	}
 }
 
 const char* get_file_ext(const char* filename) {
@@ -72,7 +74,7 @@ void send_image_file(int client_socket, const char* filepath) {
 
 int main() {
 	// Catch ctrl+c so we can close the socket before exiting
-	signal(SIGINT, sigint_handler);
+	signal(SIGINT, signal_handler);
 
 	// Create endpoint resolution table
 	Table endpoints = LoadEndpoints();
@@ -117,7 +119,7 @@ int main() {
 			continue;
 		}
 
-		size_t bytes_read = read(client_socket, rx_buffer, BUFFER_SIZE-1);
+		ssize_t bytes_read = read(client_socket, rx_buffer, BUFFER_SIZE-1);
 		if (bytes_read >= 0) {
 			rx_buffer[bytes_read] = 0;
 		}

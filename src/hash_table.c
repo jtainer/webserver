@@ -3,10 +3,10 @@
 #include <stdio.h>
 #include <string.h>
 
-uint32_t HashString(const uint8_t* str) {
+uint32_t HashString(const char* str) {
 	uint32_t hash = 987654321;
 	uint8_t c;
-	while (c = *str++) {
+	while ((c = *str++)) {
 		hash = (hash * 17000069) + c;
 	}
 	return hash;

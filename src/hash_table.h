@@ -20,7 +20,7 @@ typedef struct {
 
 } Table;
 
-uint32_t HashString(const uint8_t* str);
+uint32_t HashString(const char* str);
 
 Table CreateTable(const uint32_t size);
 
